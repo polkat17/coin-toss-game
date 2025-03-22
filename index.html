@@ -144,10 +144,6 @@
       const nameInput = document.getElementById("nameInput");
       const name = nameInput.value.trim();
 
-      console.log("📝 Save Name Clicked");
-      console.log("Entered Name:", name);
-      console.log("User ID:", userId);
-
       if (!userId) {
         alert("Please wait — still connecting to Firebase.");
         return;
@@ -161,7 +157,6 @@
       const userRef = ref(db, `users/${userId}`);
       update(userRef, { name })
         .then(() => {
-          console.log("✅ Name updated successfully in Firebase.");
           userName = name;
           document.getElementById("status").textContent = `Name saved as "${name}" ✅`;
         })
@@ -203,19 +198,28 @@
 
         const data = [];
         snapshot.forEach((child) => {
-          data.push({ id: child.key, ...child.val() });
+          const val = child.val();
+          if (val && typeof val.wins === "number") {
+            data.push({ id: child.key, ...val });
+          }
         });
 
-        data.reverse().forEach((player) => {
+        if (data.length === 0) {
+          const li = document.createElement("li");
+          li.textContent = "No players yet";
+          list.appendChild(li);
+          return;
+        }
+
+        data.reverse().forEach((player, index) => {
           const li = document.createElement("li");
           const name = player.name || player.id.slice(0, 6);
-          li.textContent = `${player.id === userId ? name + " (You)" : name} – ${player.wins}`;
+          li.textContent = `${index + 1}. ${player.id === userId ? name + " (You)" : name} – ${player.wins}`;
           list.appendChild(li);
         });
       });
     }
 
-    // ✅ Make functions available globally for HTML onclick
     window.saveName = saveName;
     window.startMatch = startMatch;
   </script>
