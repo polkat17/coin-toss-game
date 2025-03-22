@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <title>Multiplayer Coin Toss</title>
 
-  <!-- ✅ FINAL CSP FIXED FOR MODULE SCRIPTS AND INLINE USAGE -->
+  <!-- ✅ FINAL CSP: Fully compatible with Firebase Realtime Database and inline usage -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
-    script-src 'self' https://www.gstatic.com 'unsafe-inline';
-    script-src-elem 'self' https://www.gstatic.com;
+    script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app 'unsafe-inline';
+    script-src-elem 'self' https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app;
     style-src 'self' 'unsafe-inline';
-    connect-src https://*.firebaseio.com https://*.googleapis.com;
+    connect-src https://*.firebaseio.com https://*.googleapis.com https://*.firebasedatabase.app;
   ">
 
   <style>
