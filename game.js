@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
-import { getDatabase, ref, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
+import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -71,6 +71,7 @@ function saveName() {
     .then(() => {
       userName = name;
       document.getElementById("status").textContent = `Name saved as "${name}" ✅`;
+      listenToLeaderboard(); // Refresh leaderboard on name change
     })
     .catch((err) => {
       console.error("❌ Failed to save name:", err);
@@ -99,26 +100,27 @@ function startMatch() {
     }
 
     document.getElementById("yourWins").textContent = userWins;
+    listenToLeaderboard(); // Refresh leaderboard after each match
   }, 1000);
 }
 
+// ✅ NEW: One-time get() instead of onValue()
 function listenToLeaderboard() {
   const leaderboardRef = ref(db, 'users');
 
-  onValue(leaderboardRef, (snapshot) => {
+  get(leaderboardRef).then((snapshot) => {
+    console.log("📦 Raw snapshot:", snapshot.val());
+
     const list = document.getElementById("leaderboardList");
     list.innerHTML = "";
 
     const data = [];
     snapshot.forEach((child) => {
       const val = child.val();
-      console.log("👤 Child snapshot:", val); // DEBUG
       if (val && typeof val.wins === "number") {
         data.push({ id: child.key, ...val });
       }
     });
-
-    console.log("🔥 Final sorted leaderboard data:", data); // DEBUG
 
     if (data.length === 0) {
       const li = document.createElement("li");
@@ -136,11 +138,11 @@ function listenToLeaderboard() {
       li.textContent = `${index + 1}. ${label} – ${player.wins}`;
       list.appendChild(li);
     });
-  }, {
-    onlyOnce: false
+  }).catch((error) => {
+    console.error("❌ Failed to read leaderboard:", error);
   });
 }
 
-// ✅ Hook up buttons by ID
+// ✅ Hook up buttons
 document.getElementById("saveNameBtn").addEventListener("click", saveName);
 document.getElementById("tossBtn").addEventListener("click", startMatch);
