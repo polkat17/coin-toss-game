@@ -112,10 +112,13 @@ function listenToLeaderboard() {
     const data = [];
     snapshot.forEach((child) => {
       const val = child.val();
+      console.log("👤 Child snapshot:", val); // DEBUG
       if (val && typeof val.wins === "number") {
         data.push({ id: child.key, ...val });
       }
     });
+
+    console.log("🔥 Final sorted leaderboard data:", data); // DEBUG
 
     if (data.length === 0) {
       const li = document.createElement("li");
@@ -125,12 +128,16 @@ function listenToLeaderboard() {
     }
 
     data.sort((a, b) => b.wins - a.wins);
+
     data.slice(0, 5).forEach((player, index) => {
       const li = document.createElement("li");
       const name = player.name || player.id.slice(0, 6);
-      li.textContent = `${index + 1}. ${player.id === userId ? name + " (You)" : name} – ${player.wins}`;
+      const label = player.id === userId ? `${name} (You)` : name;
+      li.textContent = `${index + 1}. ${label} – ${player.wins}`;
       list.appendChild(li);
     });
+  }, {
+    onlyOnce: false
   });
 }
 
