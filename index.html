@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <title>Multiplayer Coin Toss</title>
 
-  <!-- ✅ FINAL CSP: Full Firebase compatibility -->
+  <!-- ✅ FINAL CSP for full Firebase support including eval and fallback features -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
-    script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app;
+    script-src 'self' https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app 'unsafe-eval';
     script-src-elem 'self' https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app;
     style-src 'self' 'unsafe-inline';
     connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.firebasedatabase.app wss://*.firebasedatabase.app;
@@ -95,7 +95,7 @@
     <ol id="leaderboardList"></ol>
   </div>
 
-  <!-- ✅ External JS with Firebase logic -->
+  <!-- ✅ External Firebase logic with module script -->
   <script type="module" src="game.js"></script>
 </body>
 </html>
