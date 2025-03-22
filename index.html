@@ -4,8 +4,13 @@
   <meta charset="UTF-8" />
   <title>Multiplayer Coin Toss</title>
 
-  <!-- ✅ Secure Content Security Policy -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; connect-src https://*.firebaseio.com https://*.googleapis.com; style-src 'self';">
+  <!-- ✅ CSP allows inline styles & onclick attributes (for dev use) -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://www.gstatic.com 'unsafe-inline';
+    style-src 'self' 'unsafe-inline';
+    connect-src https://*.firebaseio.com https://*.googleapis.com;
+  ">
 
   <style>
     body {
@@ -88,7 +93,6 @@
     <ol id="leaderboardList"></ol>
   </div>
 
-  <!-- Firebase SDK & Game Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
     import { getDatabase, ref, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
@@ -198,15 +202,12 @@
       const leaderboardRef = ref(db, 'users');
 
       onValue(leaderboardRef, (snapshot) => {
-        console.log("📡 Data received in onValue!");
-
         const list = document.getElementById("leaderboardList");
         list.innerHTML = "";
 
         const data = [];
         snapshot.forEach((child) => {
           const val = child.val();
-          console.log("📦 Child:", val);
           if (val && typeof val.wins === "number") {
             data.push({ id: child.key, ...val });
           }
