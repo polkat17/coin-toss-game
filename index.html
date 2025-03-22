@@ -90,7 +90,6 @@
     import { getDatabase, ref, set, get, update, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
 
-    // ✅ Your Firebase Config with databaseURL
     const firebaseConfig = {
       apiKey: "AIzaSyCA6MsZ9m0WVShWRWqJBDD-5V0cdZKdrG0",
       authDomain: "coin-toss-multiplayer.firebaseapp.com",
@@ -145,6 +144,10 @@
       const nameInput = document.getElementById("nameInput");
       const name = nameInput.value.trim();
 
+      console.log("📝 Save Name Clicked");
+      console.log("Entered Name:", name);
+      console.log("User ID:", userId);
+
       if (!userId) {
         alert("Please wait — still connecting to Firebase.");
         return;
@@ -158,12 +161,13 @@
       const userRef = ref(db, `users/${userId}`);
       update(userRef, { name })
         .then(() => {
+          console.log("✅ Name updated successfully in Firebase.");
           userName = name;
           document.getElementById("status").textContent = `Name saved as "${name}" ✅`;
         })
         .catch((err) => {
-          console.error("Failed to save name:", err);
-          alert("Error saving name. Try again.");
+          console.error("❌ Failed to save name:", err);
+          alert("Error saving name. Check the console for details.");
         });
     }
 
@@ -173,43 +177,4 @@
       void coin.offsetWidth; // restart animation
       coin.classList.add("spin");
 
-      document.getElementById("status").textContent = "Flipping...";
-
-      setTimeout(() => {
-        const result = Math.random() < 0.5 ? "win" : "lose";
-        const userRef = ref(db, `users/${userId}`);
-
-        if (result === "win") {
-          userWins++;
-          update(userRef, { wins: userWins });
-          document.getElementById("status").textContent = "🎉 You WON the toss!";
-        } else {
-          document.getElementById("status").textContent = "😞 You lost the toss!";
-        }
-
-        document.getElementById("yourWins").textContent = userWins;
-      }, 1000);
-    }
-
-    function listenToLeaderboard() {
-      const leaderboardRef = query(ref(db, 'users'), orderByChild('wins'), limitToLast(5));
-      onValue(leaderboardRef, (snapshot) => {
-        const list = document.getElementById("leaderboardList");
-        list.innerHTML = "";
-
-        const data = [];
-        snapshot.forEach((child) => {
-          data.push({ id: child.key, ...child.val() });
-        });
-
-        data.reverse().forEach((player) => {
-          const li = document.createElement("li");
-          const name = player.name || player.id.slice(0, 6);
-          li.textContent = `${player.id === userId ? name + " (You)" : name} – ${player.wins}`;
-          list.appendChild(li);
-        });
-      });
-    }
-  </script>
-</body>
-</html>
+      document.getElementById("status").textContent =
