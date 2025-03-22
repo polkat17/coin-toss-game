@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <title>Multiplayer Coin Toss</title>
+
+  <!-- ✅ Secure Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; connect-src https://*.firebaseio.com https://*.googleapis.com; style-src 'self';">
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -190,7 +194,6 @@
       }, 1000);
     }
 
-    // ✅ Updated Leaderboard using full data + client-side sort
     function listenToLeaderboard() {
       const leaderboardRef = ref(db, 'users');
 
