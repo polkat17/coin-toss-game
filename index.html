@@ -199,10 +199,13 @@
         const data = [];
         snapshot.forEach((child) => {
           const val = child.val();
+          console.log("📦 Raw child data:", val); // 🔍 Debug log
           if (val && typeof val.wins === "number") {
             data.push({ id: child.key, ...val });
           }
         });
+
+        console.log("🔥 Leaderboard data array:", data); // 🔍 Debug log
 
         if (data.length === 0) {
           const li = document.createElement("li");
