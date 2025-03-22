@@ -93,7 +93,7 @@
     const firebaseConfig = {
       apiKey: "AIzaSyCA6MsZ9m0WVShWRWqJBDD-5V0cdZKdrG0",
       authDomain: "coin-toss-multiplayer.firebaseapp.com",
-      databaseURL: "https://coin-toss-multiplayer-default-rtdb.firebaseio.com",
+      databaseURL: "https://coin-toss-multiplayer-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "coin-toss-multiplayer",
       storageBucket: "coin-toss-multiplayer.firebasestorage.app",
       messagingSenderId: "448920482222",
@@ -177,4 +177,43 @@
       void coin.offsetWidth; // restart animation
       coin.classList.add("spin");
 
-      document.getElementById("status").textContent =
+      document.getElementById("status").textContent = "Flipping...";
+
+      setTimeout(() => {
+        const result = Math.random() < 0.5 ? "win" : "lose";
+        const userRef = ref(db, `users/${userId}`);
+
+        if (result === "win") {
+          userWins++;
+          update(userRef, { wins: userWins });
+          document.getElementById("status").textContent = "🎉 You WON the toss!";
+        } else {
+          document.getElementById("status").textContent = "😞 You lost the toss!";
+        }
+
+        document.getElementById("yourWins").textContent = userWins;
+      }, 1000);
+    }
+
+    function listenToLeaderboard() {
+      const leaderboardRef = query(ref(db, 'users'), orderByChild('wins'), limitToLast(5));
+      onValue(leaderboardRef, (snapshot) => {
+        const list = document.getElementById("leaderboardList");
+        list.innerHTML = "";
+
+        const data = [];
+        snapshot.forEach((child) => {
+          data.push({ id: child.key, ...child.val() });
+        });
+
+        data.reverse().forEach((player) => {
+          const li = document.createElement("li");
+          const name = player.name || player.id.slice(0, 6);
+          li.textContent = `${player.id === userId ? name + " (You)" : name} – ${player.wins}`;
+          list.appendChild(li);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
