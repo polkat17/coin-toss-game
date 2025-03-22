@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Coin Toss Duel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #111;
+      color: #fff;
+      padding: 30px;
+    }
+    .coin {
+      font-size: 80px;
+      margin: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      background: #0a84ff;
+      border: none;
+      color: white;
+      border-radius: 8px;
+    }
+    .leaderboard {
+      margin-top: 40px;
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .leaderboard h2 {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Coin Toss Duel</h1>
+  <div class="coin">🪙</div>
+  <p id="result">Click toss to play a match</p>
+  <button class="btn" onclick="tossCoin()">Toss Coin</button>
+
+  <h3>Your Wins: <span id="yourWins">0</span></h3>
+
+  <div class="leaderboard">
+    <h2>Leaderboard</h2>
+    <ol>
+      <li>PlayerMax – 182</li>
+      <li>FlipQueen – 169</li>
+      <li>You – <span id="yourScore">0</span></li>
+      <li>Bot69 – 140</li>
+      <li>LuckyLuke – 138</li>
+    </ol>
+  </div>
+
+  <script>
+    let wins = 0;
+
+    function tossCoin() {
+      const result = Math.random() < 0.5 ? "You Win!" : "You Lose!";
+      document.getElementById("result").textContent = result;
+
+      if (result === "You Win!") {
+        wins++;
+        document.getElementById("yourWins").textContent = wins;
+        document.getElementById("yourScore").textContent = wins;
+      }
+    }
+  </script>
+
+</body>
+</html>
