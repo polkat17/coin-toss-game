@@ -11,6 +11,7 @@
       text-align: center;
       padding: 30px;
     }
+
     .btn {
       padding: 12px 24px;
       font-size: 18px;
@@ -19,7 +20,9 @@
       border-radius: 8px;
       color: white;
       cursor: pointer;
+      margin-top: 10px;
     }
+
     .leaderboard {
       margin-top: 40px;
       background: #222;
@@ -29,12 +32,164 @@
       margin-left: auto;
       margin-right: auto;
     }
-    .leaderboard h2 {
-      margin-top: 0;
+
+    .coin {
+      font-size: 80px;
+      display: inline-block;
+      margin: 20px 0;
+      transition: transform 1s;
+    }
+
+    .spin {
+      animation: spin 1s ease;
+    }
+
+    @keyframes spin {
+      0%   { transform: rotateY(0deg); }
+      100% { transform: rotateY(720deg); }
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      margin-top: 10px;
+      width: 200px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
 
   <h1>Multiplayer Coin Toss</h1>
-  <p id="
+
+  <div class="input-group">
+    <input id="nameInput" placeholder="Enter your name" />
+    <button class="btn" onclick="saveName()">Save Name</button>
+  </div>
+
+  <div class="coin" id="coin">🪙</div>
+  <p id="status">Connecting to Firebase...</p>
+  <button class="btn" onclick="startMatch()">Toss Coin</button>
+
+  <h3>Your Wins: <span id="yourWins">0</span></h3>
+
+  <div class="leaderboard">
+    <h2>Leaderboard (Top 5)</h2>
+    <ol id="leaderboardList"></ol>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+    import { getDatabase, ref, set, get, update, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCA6MsZ9m0WVShWRWqJBDD-5V0cdZKdrG0",
+      authDomain: "coin-toss-multiplayer.firebaseapp.com",
+      projectId: "coin-toss-multiplayer",
+      storageBucket: "coin-toss-multiplayer.firebasestorage.app",
+      messagingSenderId: "448920482222",
+      appId: "1:448920482222:web:a62656b2febb8bce77583f",
+      measurementId: "G-JPCL0DLYSJ",
+      databaseURL: "https://coin-toss-multiplayer-default-rtdb.firebaseio.com"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth();
+
+    let currentUser = null;
+    let userId = null;
+    let userWins = 0;
+    let userName = "You";
+
+    signInAnonymously(auth)
+      .then(() => {
+        document.getElementById("status").textContent = "Connected. Ready to toss!";
+      })
+      .catch((error) => {
+        document.getElementById("status").textContent = "Auth failed.";
+        console.error(error);
+      });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        userId = user.uid;
+        const userRef = ref(db, `users/${userId}`);
+        get(userRef).then((snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            userWins = data.wins || 0;
+            userName = data.name || "You";
+            document.getElementById("yourWins").textContent = userWins;
+            document.getElementById("nameInput").value = userName;
+          } else {
+            set(userRef, { wins: 0, name: "You" });
+          }
+        });
+        listenToLeaderboard();
+      }
+    });
+
+    function saveName() {
+      const name = document.getElementById("nameInput").value.trim();
+      if (name.length === 0) return;
+      const userRef = ref(db, `users/${userId}`);
+      update(userRef, { name });
+      userName = name;
+    }
+
+    function startMatch() {
+      const coin = document.getElementById("coin");
+      coin.classList.remove("spin");
+      void coin.offsetWidth; // restart animation
+      coin.classList.add("spin");
+
+      document.getElementById("status").textContent = "Flipping...";
+
+      setTimeout(() => {
+        const result = Math.random() < 0.5 ? "win" : "lose";
+        const userRef = ref(db, `users/${userId}`);
+
+        if (result === "win") {
+          userWins++;
+          update(userRef, { wins: userWins });
+          document.getElementById("status").textContent = "🎉 You WON the toss!";
+        } else {
+          document.getElementById("status").textContent = "😞 You lost the toss!";
+        }
+
+        document.getElementById("yourWins").textContent = userWins;
+      }, 1000);
+    }
+
+    function listenToLeaderboard() {
+      const leaderboardRef = query(ref(db, 'users'), orderByChild('wins'), limitToLast(5));
+      onValue(leaderboardRef, (snapshot) => {
+        const list = document.getElementById("leaderboardList");
+        list.innerHTML = "";
+
+        const data = [];
+        snapshot.forEach((child) => {
+          data.push({ id: child.key, ...child.val() });
+        });
+
+        data.reverse().forEach((player) => {
+          const li = document.createElement("li");
+          const name = player.name || player.id.slice(0, 6);
+          li.textContent = `${player.id === userId ? name + " (You)" : name} – ${player.wins}`;
+          list.appendChild(li);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
