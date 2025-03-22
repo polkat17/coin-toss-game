@@ -174,7 +174,7 @@
     function startMatch() {
       const coin = document.getElementById("coin");
       coin.classList.remove("spin");
-      void coin.offsetWidth; // restart animation
+      void coin.offsetWidth;
       coin.classList.add("spin");
 
       document.getElementById("status").textContent = "Flipping...";
@@ -214,6 +214,10 @@
         });
       });
     }
+
+    // ✅ Make functions available globally for HTML onclick
+    window.saveName = saveName;
+    window.startMatch = startMatch;
   </script>
 </body>
 </html>
