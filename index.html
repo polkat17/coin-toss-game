@@ -87,7 +87,7 @@
   <!-- Firebase SDK & Game Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
-    import { getDatabase, ref, set, get, update, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
+    import { getDatabase, ref, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -190,22 +190,24 @@
       }, 1000);
     }
 
+    // ✅ Updated Leaderboard using full data + client-side sort
     function listenToLeaderboard() {
-      const leaderboardRef = query(ref(db, 'users'), orderByChild('wins'), limitToLast(5));
+      const leaderboardRef = ref(db, 'users');
+
       onValue(leaderboardRef, (snapshot) => {
+        console.log("📡 Data received in onValue!");
+
         const list = document.getElementById("leaderboardList");
         list.innerHTML = "";
 
         const data = [];
         snapshot.forEach((child) => {
           const val = child.val();
-          console.log("📦 Raw child data:", val); // 🔍 Debug log
+          console.log("📦 Child:", val);
           if (val && typeof val.wins === "number") {
             data.push({ id: child.key, ...val });
           }
         });
-
-        console.log("🔥 Leaderboard data array:", data); // 🔍 Debug log
 
         if (data.length === 0) {
           const li = document.createElement("li");
@@ -214,7 +216,8 @@
           return;
         }
 
-        data.reverse().forEach((player, index) => {
+        data.sort((a, b) => b.wins - a.wins);
+        data.slice(0, 5).forEach((player, index) => {
           const li = document.createElement("li");
           const name = player.name || player.id.slice(0, 6);
           li.textContent = `${index + 1}. ${player.id === userId ? name + " (You)" : name} – ${player.wins}`;
